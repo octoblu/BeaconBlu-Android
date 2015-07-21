@@ -1,20 +1,15 @@
 package com.octoblu.beaconblu;
 
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.TextView;
 
-import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.Region;
 
 /**
  *
@@ -93,9 +88,9 @@ public class MonitoringActivity extends Activity  {
     public void logToDisplay(final String line) {
         runOnUiThread(new Runnable() {
             public void run() {
-                EditText editText = (EditText)MonitoringActivity.this
+                TextView monitoringText = (TextView) MonitoringActivity.this
                         .findViewById(R.id.monitoringText);
-                editText.append(line+"\n");
+                monitoringText.append(line + "\n");
             }
         });
     }
