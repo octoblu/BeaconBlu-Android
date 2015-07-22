@@ -3,6 +3,7 @@ package com.octoblu.beaconblu;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +26,14 @@ public class SaneJSONObject extends JSONObject {
         }
     }
 
+    public Integer getIntOrNull(@Nullable String name) {
+        try {
+            return this.getInt(name);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
     public String getStringOrThrow(@Nullable String name) {
         String value = getStringOrNull(name);
         if (value == null) {
@@ -34,6 +43,38 @@ public class SaneJSONObject extends JSONObject {
     }
 
     public void putOrIgnore(@Nullable String name, @Nullable String value){
+        try {
+            put(name, value);
+        } catch (JSONException e) {
+            return;
+        }
+    }
+
+    public void putIntOrIgnore(@Nullable String name, @Nullable Integer value){
+        try {
+            put(name, value);
+        } catch (JSONException e) {
+            return;
+        }
+    }
+
+    public void putDoubleOrIgnore(@Nullable String name, @Nullable Double value){
+        try {
+            put(name, value);
+        } catch (JSONException e) {
+            return;
+        }
+    }
+
+    public void putJSONOrIgnore(@Nullable String name, @Nullable JSONObject value){
+        try {
+            put(name, value);
+        } catch (JSONException e) {
+            return;
+        }
+    }
+
+    public void putArrayOrIgnore(@Nullable String name, @Nullable JSONArray value){
         try {
             put(name, value);
         } catch (JSONException e) {

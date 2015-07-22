@@ -33,24 +33,51 @@ public class Meshblu extends Emitter {
     public static final String GENERATED_TOKEN = "generated_token";
     public static final String ERROR = "error";
 
-    private static final String MESHBLU_URL = "https://meshblu.octoblu.com";
+    private String MESHBLU_URL = "https://meshblu.octoblu.com";
     private final Context context;
     private String uuid, token;
 
 
-    public Meshblu(String uuid, String token, Context context){
-        this.uuid = uuid;
-        this.token = token;
+    public Meshblu(SaneJSONObject meshbluConfig, Context context){
+        setCredentials(meshbluConfig);
         this.context = context;
     }
 
-    private void register() {
+    public void setCredentials(SaneJSONObject meshbluConfig){
+        this.uuid = meshbluConfig.getStringOrNull("uuid");
+        this.token = meshbluConfig.getStringOrNull("token");
+        Integer port = meshbluConfig.getIntOrNull("port");
+        if(port == null){
+            port = 80;
+        }
+        String portString = "";
+        String protocol = "http";
+        switch(port){
+            case 443:
+                protocol = "https";
+                break;
+            case 80:
+                break;
+            default:
+                portString = String.format(":%i", port);
+                break;
+        }
+        String server = meshbluConfig.getStringOrNull("server");
+        if(server == null){
+            server = "meshblu.octoblu.com";
+        }
+        this.MESHBLU_URL = String.format("%s://%s%s", protocol, server, portString);
+    }
+
+    public Boolean isRegistered(){
+        return this.uuid != null;
+    }
+
+    public void register(SaneJSONObject properties) {
+        Log.d(TAG, "Registering device");
         RequestQueue queue = Volley.newRequestQueue(context);
         String url = String.format("%s/devices", MESHBLU_URL);
-        com.octoblu.beaconblu.SaneJSONObject data = new com.octoblu.beaconblu.SaneJSONObject();
-        data.putOrIgnore("type", "device:gateblu");
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, data, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, properties, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 emit(REGISTER, jsonObject);

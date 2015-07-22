@@ -1,112 +1,67 @@
 package com.octoblu.beaconblu;
 
 import android.app.Application;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.Context;
-import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
+import android.content.SharedPreferences;
 import android.util.Log;
 
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.powersave.BackgroundPowerSaver;
-import org.altbeacon.beacon.startup.RegionBootstrap;
-import org.altbeacon.beacon.startup.BootstrapNotifier;
+import com.github.nkzawa.emitter.Emitter;
+
+import org.json.JSONObject;
 
 
-public class BeaconApplication extends Application implements BootstrapNotifier {
+public class BeaconApplication extends Application {
     private static final String TAG = "BeaconApplication";
-    private RegionBootstrap regionBootstrap;
-    private BackgroundPowerSaver backgroundPowerSaver;
-    private boolean haveDetectedBeaconsSinceBoot = false;
-    private MonitoringActivity monitoringActivity = null;
+    private static final String PREFERENCES_FILE_NAME = "meshblu_preferences";
+    private static final String UUID = "uuid";
+    private static final String TOKEN = "token";
+    private MeshbluBeacon meshbluBeacon;
 
 
     public void onCreate() {
         super.onCreate();
-        BeaconManager beaconManager = org.altbeacon.beacon.BeaconManager.getInstanceForApplication(this);
-
-        beaconManager.getBeaconParsers().add(getParser("Estimote"));
-
-        Log.d(TAG, "Starting Beacon, with");
-
-        Region region = new Region("backgroundRegion", null, null, null);
-        regionBootstrap = new RegionBootstrap(this, region);
-
-        backgroundPowerSaver = new BackgroundPowerSaver(this);
-    }
-
-    private BeaconParser getParser(String parser){
-        String layout;
-        switch(parser){
-        case "Estimote":
-            layout = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
-            break;
-        case "iBeacon":
-            layout = "m:0-3=4c000215,i:4-19,i:20-21,i:22-23,p:24-24";
-            break;
-        case "easiBeacons":
-            layout = "m:0-3=a7ae2eb7,i:4-19,i:20-21,i:22-23,p:24-24";
-            break;
-        default:
-            layout = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
-            break;
-        }
-        return new BeaconParser().setBeaconLayout(layout);
-    }
-
-    @Override
-    public void didEnterRegion(Region arg0) {
-        Log.d(TAG, "Did enter region.");
-        if (!haveDetectedBeaconsSinceBoot) {
-            Log.d(TAG, "Auto launching MontitoringActivity");
-
-            Intent intent = new Intent(this, MonitoringActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.startActivity(intent);
-            haveDetectedBeaconsSinceBoot = true;
-        } else {
-            if (monitoringActivity != null) {
-                monitoringActivity.logToDisplay("I see a beacon again");
-            } else {
-                Log.d(TAG, "Sending notification...");
-                sendNotification();
+        Log.d(TAG, "Starting Beacon Application");
+        meshbluBeacon = new MeshbluBeacon(BeaconApplication.this.getCredentials(), this);
+        meshbluBeacon.on(MeshbluBeacon.REGISTER, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "Registered emitted event");
+                JSONObject deviceJSON = (JSONObject) args[0];
+                saveCredentials(new SaneJSONObject().fromJSONObject(deviceJSON));
             }
-        }
+        });
+        meshbluBeacon.on(MeshbluBeacon.LOCATION_UPDATE, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "Location update happened!");
+            }
+        });
+        meshbluBeacon.start("Estimote");
     }
 
-    @Override
-    public void didExitRegion(Region region) {
-        if (monitoringActivity != null) {
-            monitoringActivity.logToDisplay("I no longer see a beacon.");
-        }
+    private SharedPreferences.Editor getPreferencesEditor() {
+        return getSharedPreferences(PREFERENCES_FILE_NAME, 0).edit();
     }
 
-    @Override
-    public void didDetermineStateForRegion(int state, Region region) {
-        if (monitoringActivity != null) {
-            monitoringActivity.logToDisplay("I have just switched from seeing/not seeing beacons: " + state);
-        }
+    private SaneJSONObject getCredentials(){
+        SaneJSONObject meshbluConfig = new SaneJSONObject();
+        SharedPreferences preferences = getSharedPreferences(BeaconApplication.PREFERENCES_FILE_NAME, 0);
+        String uuid = preferences.getString(BeaconApplication.UUID, null);
+        String token = preferences.getString(BeaconApplication.TOKEN, null);
+        Log.d(TAG, String.format("Credentials %s %s", uuid, token));
+        meshbluConfig.putOrIgnore("uuid", uuid);
+        meshbluConfig.putOrIgnore("token", token);
+        return meshbluConfig;
     }
 
-    private void sendNotification() {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
-                .setContentTitle("BeaconBlu Application")
-                .setContentText("An beacon is nearby.");
+    private void saveCredentials(SaneJSONObject gatebluJSON) {
+        String uuid = gatebluJSON.getStringOrNull("uuid");
+        String token = gatebluJSON.getStringOrNull("token");
 
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntent(new Intent(this, MonitoringActivity.class));
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(resultPendingIntent);
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, builder.build());
-    }
-
-    public void setMonitoringActivity(MonitoringActivity activity) {
-        this.monitoringActivity = activity;
+        SharedPreferences.Editor preferences = getPreferencesEditor();
+        preferences.clear();
+        preferences.putString(UUID, uuid);
+        preferences.putString(TOKEN, token);
+        preferences.commit();
     }
 }
 
