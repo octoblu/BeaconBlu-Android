@@ -26,21 +26,32 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     private static final String TAG = "MeshbluBeacon";
     private static final Double VERSION = 1.0;
-    public static final String LOCATION_UPDATE = "location_update";
-    public static final String REGISTER = "register";
     private Meshblu meshblu;
     private Emitter emitter = new Emitter();
     private Boolean monitoring = true;
     private RegionBootstrap regionBootstrap;
     private BackgroundPowerSaver backgroundPowerSaver;
-    private String beaconType;
+    private List<String> beaconTypes;
     private Context context;
     private BeaconManager beaconManager;
-
+    public final class BEACON_TYPES {
+        public static final String ESTIMOTE = "Estimote";
+        public static final String IBEACON = "iBeacon";
+        public static final String EASIBEACON = "easiBeacon";
+        public static final String ALTBEACON = "AltBeacon";
+    }
+    public final class EVENTS {
+        public static final String REGISTER = "register";
+        public static final String LOCATION_UPDATE = "location_update";
+        public static final String DID_ENTER_REGION = "did_enter_region";
+        public static final String DID_EXIT_REGION = "did_exit_region";
+        public static final String REGION_STATE_CHANGE = "region_state_change";
+    }
     public MeshbluBeacon(SaneJSONObject meshbluConfig, Context context){
         this.meshblu = new Meshblu(meshbluConfig, context);
         this.context = context;
@@ -61,8 +72,8 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         emitter.off();
     }
 
-    public void start(String beaconType){
-        this.beaconType = beaconType;
+    public void start(List<String> beaconTypes){
+        this.beaconTypes = beaconTypes;
         startMeshbluListeners();
         if(!meshblu.isRegistered()){
             Log.d(TAG, "Device is not registered, registering now");
@@ -81,7 +92,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
             @Override
             public void call(Object... args) {
                 Log.d(TAG, "Regsitered");
-                emitter.emit(REGISTER, args);
+                emitter.emit(EVENTS.REGISTER, args);
                 JSONObject deviceJSON = (JSONObject) args[0];
                 setCredentials(SaneJSONObject.fromJSONObject(deviceJSON));
                 startBeaconMonitoring();
@@ -91,8 +102,10 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
 
     public void startBeaconMonitoring(){
         verifyBluetooth();
-        BeaconManager beaconManager = BeaconManager.getInstanceForApplication(context);
-        beaconManager.getBeaconParsers().add(getParser(beaconType));
+
+        for(String type : beaconTypes){
+            beaconManager.getBeaconParsers().add(getParser(type));
+        }
 
         Log.d(TAG, "Starting Beacon monitoring...");
 
@@ -103,17 +116,21 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         beaconManager.bind(this);
     }
 
+
     private BeaconParser getParser(String parser){
         String layout;
         switch(parser){
-            case "Estimote":
+            case BEACON_TYPES.ESTIMOTE:
                 layout = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24";
                 break;
-            case "iBeacon":
+            case BEACON_TYPES.IBEACON:
                 layout = "m:0-3=4c000215,i:4-19,i:20-21,i:22-23,p:24-24";
                 break;
-            case "easiBeacons":
+            case BEACON_TYPES.EASIBEACON:
                 layout = "m:0-3=a7ae2eb7,i:4-19,i:20-21,i:22-23,p:24-24";
+                break;
+            case BEACON_TYPES.ALTBEACON:
+                layout = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
                 break;
             default:
                 layout = "m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25";
@@ -125,12 +142,12 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     public void resume(){
         this.monitoring = true;
         beaconManager.setBackgroundMode(false);
+
     }
 
     public void pause(){
         this.monitoring = false;
         beaconManager.setBackgroundMode(true);
-
     }
 
     @Override
@@ -153,6 +170,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         Log.d(TAG, "Did enter region.");
         if (monitoring) {
             Log.d(TAG, "I see a beacon again");
+            emitter.emit(EVENTS.DID_ENTER_REGION);
         }
     }
 
@@ -160,6 +178,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     public void didExitRegion(Region region) {
         if (monitoring) {
             Log.d(TAG, "I no longer see a beacon.");
+            emitter.emit(EVENTS.DID_EXIT_REGION);
         }
     }
 
@@ -167,6 +186,8 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     public void didDetermineStateForRegion(int state, Region region) {
         if (monitoring) {
             Log.d(TAG, "I have just switched from seeing/not seeing beacons: " + state);
+            emitter.emit(EVENTS.REGION_STATE_CHANGE, state);
+
         }
     }
 
@@ -219,16 +240,14 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
 
         // Send
         meshblu.message(message);
-        emitter.emit(LOCATION_UPDATE, payload);
+        emitter.emit(EVENTS.LOCATION_UPDATE, payload);
     }
 
     private SaneJSONObject getProximity(Beacon beacon){
         Double distance = beacon.getDistance();
         String proximity = "Unknown";
         Integer code = 0;
-        if(distance == null){
-            // Do Nothing
-        }else if(distance < 2){
+        if(distance < 2){
             code = 1;
             proximity = "Immediate";
         }else if(distance >= 2 && distance < 5){

@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">BeaconBlu</string>
 
-    <string name="beacon_status">App is running...</string>
+    <string name="beacon_types">Beacon Types</string>
     <string name="action_settings">Settings</string>
+    <string name="estimote">Estimote</string>
+    <string name="ibeacon">iBeacon</string>
+    <string name="easibeacon">easiBeacon</string>
+    <string name="altbeacon">AltBeacon</string>
 </resources>
