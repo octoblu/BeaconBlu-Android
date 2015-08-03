@@ -16,7 +16,7 @@ public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
         BeaconInfo beacon = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
@@ -26,12 +26,26 @@ public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
         // Lookup view for data population
         TextView uuid = (TextView) convertView.findViewById(R.id.uuid);
         TextView name = (TextView) convertView.findViewById(R.id.name);
-        CheckBox status = (CheckBox) convertView.findViewById(R.id.status_checkbox);
+        final CheckBox status = (CheckBox) convertView.findViewById(R.id.status_checkbox);
         // Populate the data into the template view using the data object
         uuid.setText(beacon.uuid);
         name.setText(beacon.name);
         status.setChecked(beacon.status);
+        status.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg) {
+                final boolean checked = status.isChecked();
+                onCheckboxClicked(position, checked);
+            }
+        });
         // Return the completed view to render on screen
         return convertView;
+    }
+
+    public void onCheckboxClicked(int position, Boolean checked) {
+        // Is the view now checked?
+        BeaconsActivity context = (BeaconsActivity) getContext();
+        BeaconInfo beacon = getItem(position);
+        context.setBeaconStatus(beacon.uuid, checked);
     }
 }

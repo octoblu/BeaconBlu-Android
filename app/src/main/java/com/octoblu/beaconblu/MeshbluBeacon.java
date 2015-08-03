@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.RemoteException;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -218,7 +219,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
             String distance = df.format(beacon.getDistance());
             Log.d(TAG, "Beacon (" + uuid.substring(0, 8) + ") is about " + distance + " meters away.");
 
-            if(isBeaconEnabled(uuid)){
+            if(isBeaconEnabled(uuid) != null){
                 sendBeaconChangeMessage(beacon);
             }else{
                 emitter.emit(EVENTS.DISCOVERED_BEACON, beacon);
@@ -278,9 +279,9 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         return proximityJSON;
     }
 
-    private Boolean isBeaconEnabled(String uuid){
+    private @Nullable Boolean isBeaconEnabled(String uuid){
         if(!beaconInfo.containsKey(uuid)){
-            return false;
+            return null;
         }
         return beaconInfo.get(uuid).getBoolean("status", false);
     }

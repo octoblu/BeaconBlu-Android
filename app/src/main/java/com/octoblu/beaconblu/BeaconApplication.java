@@ -25,8 +25,10 @@ public class BeaconApplication extends Application {
     private static final String TAG = "BeaconApplication";
     private static final String PREFERENCES_FILE_NAME = "meshblu_preferences";
     private static final String BEACON_STATUSES_KEY = "beacon_info";
+    public static final String BEACONS_CHANGED = "beacons_changed";
     private static final String UUID = "uuid";
     private static final String TOKEN = "token";
+    private Emitter emitter = new Emitter();
     private MeshbluBeacon meshbluBeacon;
 
     public void onCreate() {
@@ -58,7 +60,7 @@ public class BeaconApplication extends Application {
             public void call(Object... args) {
                 Log.d(TAG, "Discovered beacon");
                 Beacon beacon = (Beacon) args[0];
-                didRangeBeacon(beacon);
+                didDiscoverBeacon(beacon);
             }
         });
 
@@ -132,16 +134,21 @@ public class BeaconApplication extends Application {
         }
     }
 
-    private void setBeaconInfo(String uuid, SaneJSONObject jsonObject){
+    public void on(String event, Emitter.Listener fn) {
+        emitter.on(event, fn);
+    }
+
+    public void setBeaconInfo(String uuid, SaneJSONObject jsonObject){
         SharedPreferences.Editor preferences = getPreferencesEditor();
         SaneJSONObject beaconStatuses = getAllBeaconInfo();
         beaconStatuses.putJSONOrIgnore(uuid, jsonObject);
         preferences.putString(BEACON_STATUSES_KEY, beaconStatuses.toString());
         preferences.commit();
         meshbluBeacon.setBeaconInfo(uuid, jsonObject);
+        emitter.emit(BEACONS_CHANGED);
     }
 
-    private void didRangeBeacon(Beacon beacon){
+    private void didDiscoverBeacon(Beacon beacon){
         String uuid = beacon.getId1().toString();
         SaneJSONObject jsonObject = getBeaconInfo(getAllBeaconInfo(), uuid);
         if(jsonObject == null){

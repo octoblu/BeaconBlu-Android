@@ -46,5 +46,6 @@ android:gravity="left|center">
     android:layout_gravity="center_vertical"
     android:layout_alignBottom="@id/linear"
     android:layout_alignTop="@id/linear"
-    android:layout_alignParentRight="true"/>
+    android:layout_alignParentRight="true"
+    android:onClick="onCheckboxClicked"/>
 </RelativeLayout>

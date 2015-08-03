@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
                 beaconTypes.put(MeshbluBeacon.BEACON_TYPES.EASIBEACON, checked);
                 break;
             case R.id.checkbox_altbeacon:
-                beaconTypes.put(MeshbluBeacon.BEACON_TYPES.IBEACON, checked);
+                beaconTypes.put(MeshbluBeacon.BEACON_TYPES.ALTBEACON, checked);
                 break;
         }
 

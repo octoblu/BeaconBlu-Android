@@ -9,8 +9,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.github.nkzawa.emitter.Emitter;
+
+import org.altbeacon.beacon.Beacon;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,7 +33,6 @@ public class BeaconsActivity extends Activity {
         setContentView(R.layout.activity_beacons);
 
         application = (BeaconApplication) getApplication();
-
         createList();
     }
 
@@ -54,9 +58,13 @@ public class BeaconsActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void createList(){
-        listView = (ListView) findViewById(R.id.beacon_list);
+    public void setBeaconStatus(String uuid, Boolean status){
+        SaneJSONObject beaconInfo = application.getBeaconInfo(application.getAllBeaconInfo(), uuid);
+        beaconInfo.putBooleanOrIgnore("status", status);
+        application.setBeaconInfo(uuid, beaconInfo);
+    }
 
+    private ArrayList<BeaconInfo> getBeaconInfo(){
         SaneJSONObject beaconInfo = application.getAllBeaconInfo();
         Iterator<String> uuids = beaconInfo.keys();
         ArrayList<BeaconInfo> beacons = new ArrayList();
@@ -67,8 +75,32 @@ public class BeaconsActivity extends Activity {
             Log.d(TAG, String.format("Beacon added to array %s", uuid));
             beacons.add(new BeaconInfo(jsonObject));
         }
-
-        BeaconAdapter adapter = new BeaconAdapter(this, beacons);
-        listView.setAdapter(adapter);
+        return beacons;
     }
+
+    private void updateList(){
+        BeaconAdapter adapter = (BeaconAdapter) listView.getAdapter();
+        adapter.clear();
+        adapter.addAll(getBeaconInfo());
+    }
+
+    private void createList(){
+        listView = (ListView) findViewById(R.id.beacon_list);
+        BeaconAdapter adapter = new BeaconAdapter(this, getBeaconInfo());
+        listView.setAdapter(adapter);
+
+        application.on(BeaconApplication.BEACONS_CHANGED, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateList();
+                    }
+                });
+
+            }
+        });
+    }
+
 }
