@@ -42,7 +42,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     private List<String> beaconTypes;
     private Context context;
     private BeaconManager beaconManager;
-    private Map<String, Boolean> beaconStatuses = new HashMap();
+    private Map<String, SaneJSONObject> beaconInfo = new HashMap();
     public final class BEACON_TYPES {
         public static final String ESTIMOTE = "Estimote";
         public static final String IBEACON = "iBeacon";
@@ -279,14 +279,14 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     }
 
     private Boolean isBeaconEnabled(String uuid){
-        if(!beaconStatuses.containsKey(uuid)){
+        if(!beaconInfo.containsKey(uuid)){
             return false;
         }
-        return beaconStatuses.get(uuid);
+        return beaconInfo.get(uuid).getBoolean("status", false);
     }
 
-    public void setBeaconStatus(String uuid, Boolean status){
-        beaconStatuses.put(uuid, status);
+    public void setBeaconInfo(String uuid, SaneJSONObject info){
+        beaconInfo.put(uuid, info);
     }
 
     private void verifyBluetooth() {

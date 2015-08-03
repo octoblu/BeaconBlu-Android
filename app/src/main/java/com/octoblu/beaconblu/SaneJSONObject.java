@@ -50,6 +50,14 @@ public class SaneJSONObject extends JSONObject {
         return value;
     }
 
+    public SaneJSONObject getJSONOrNull(@Nullable String name) {
+        try {
+            return new SaneJSONObject().fromJSONObject(this.getJSONObject(name));
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
     public void putOrIgnore(@Nullable String name, @Nullable String value){
         try {
             put(name, value);

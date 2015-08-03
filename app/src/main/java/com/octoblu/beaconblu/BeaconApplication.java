@@ -24,7 +24,7 @@ import static com.octoblu.beaconblu.MeshbluBeacon.BEACON_TYPES.IBEACON;
 public class BeaconApplication extends Application {
     private static final String TAG = "BeaconApplication";
     private static final String PREFERENCES_FILE_NAME = "meshblu_preferences";
-    private static final String BEACON_STATUSES_KEY = "beacon_statuses";
+    private static final String BEACON_STATUSES_KEY = "beacon_info";
     private static final String UUID = "uuid";
     private static final String TOKEN = "token";
     private MeshbluBeacon meshbluBeacon;
@@ -63,7 +63,7 @@ public class BeaconApplication extends Application {
         });
 
         meshbluBeacon.start(getBeaconTypeList());
-        loadBeaconStatuses();
+        loadBeaconInfo();
     }
 
     private SharedPreferences.Editor getPreferencesEditor() {
@@ -110,30 +110,55 @@ public class BeaconApplication extends Application {
         preferences.commit();
     }
 
-    private SaneJSONObject getBeaconStatuses(){
+    public SaneJSONObject getAllBeaconInfo(){
         SharedPreferences preferences = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
         String jsonString = preferences.getString(BEACON_STATUSES_KEY, "{}");
         SaneJSONObject jsonObject = SaneJSONObject.fromString(jsonString);
         return jsonObject;
     }
 
-    public void loadBeaconStatuses(){
-        SaneJSONObject jsonObject = getBeaconStatuses();
-        Iterator<String> uuids = jsonObject.keys();
+    public SaneJSONObject getBeaconInfo(SaneJSONObject beaconStatuses, String uuid){
+        SaneJSONObject jsonObject = beaconStatuses.getJSONOrNull(uuid);
+        return jsonObject;
+    }
+
+    public void loadBeaconInfo(){
+        SaneJSONObject beaconInfo = getAllBeaconInfo();
+        Iterator<String> uuids = beaconInfo.keys();
         while(uuids.hasNext()){
             String uuid = uuids.next();
-            meshbluBeacon.setBeaconStatus(uuid, jsonObject.getBoolean(uuid, false));
+            SaneJSONObject jsonObject = getBeaconInfo(beaconInfo, uuid);
+            meshbluBeacon.setBeaconInfo(uuid, jsonObject);
         }
+    }
+
+    private void setBeaconInfo(String uuid, SaneJSONObject jsonObject){
+        SharedPreferences.Editor preferences = getPreferencesEditor();
+        SaneJSONObject beaconStatuses = getAllBeaconInfo();
+        beaconStatuses.putJSONOrIgnore(uuid, jsonObject);
+        preferences.putString(BEACON_STATUSES_KEY, beaconStatuses.toString());
+        preferences.commit();
+        meshbluBeacon.setBeaconInfo(uuid, jsonObject);
     }
 
     private void setBeaconStatus(Beacon beacon, Boolean status){
         String uuid = beacon.getId1().toString();
-        SharedPreferences.Editor preferences = getPreferencesEditor();
-        SaneJSONObject jsonObject = getBeaconStatuses();
-        jsonObject.putBooleanOrIgnore(uuid, status);
-        preferences.putString(BEACON_STATUSES_KEY, jsonObject.toString());
-        preferences.commit();
-        meshbluBeacon.setBeaconStatus(uuid, status);
+        SaneJSONObject jsonObject = getBeaconInfo(getAllBeaconInfo(), uuid);
+        if(jsonObject == null){
+            jsonObject = new SaneJSONObject().fromString("{}");
+        }
+        jsonObject.putBooleanOrIgnore("status", status);
+        setBeaconInfo(uuid, jsonObject);
+    }
+
+    private void setBeaconRangeChange(Beacon beacon, Double distance){
+        String uuid = beacon.getId1().toString();
+        SaneJSONObject jsonObject = getBeaconInfo(getAllBeaconInfo(), uuid);
+        if(jsonObject == null){
+            jsonObject = new SaneJSONObject().fromString("{}");
+        }
+        jsonObject.putDoubleOrIgnore("range_change", distance);
+        setBeaconInfo(uuid, jsonObject);
     }
 
     private SaneJSONObject getCredentials(){

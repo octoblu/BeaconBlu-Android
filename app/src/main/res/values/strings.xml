@@ -7,4 +7,8 @@
     <string name="ibeacon">iBeacon</string>
     <string name="easibeacon">easiBeacon</string>
     <string name="altbeacon">AltBeacon</string>
+    <string name="title_activity_beacons">BeaconsActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="view_beacons">View Beacons</string>
 </resources>

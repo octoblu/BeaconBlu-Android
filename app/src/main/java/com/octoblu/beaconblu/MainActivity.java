@@ -1,12 +1,16 @@
 package com.octoblu.beaconblu;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+
+import org.altbeacon.beacon.Beacon;
+
 import java.util.Map;
 
 
@@ -57,6 +61,11 @@ public class MainActivity extends Activity {
         }
 
         application.setBeaconTypes(beaconTypes);
+    }
+
+    public void openBeaconsActivity(View view){
+        Intent intent = new Intent(this, BeaconsActivity.class);
+        MainActivity.this.startActivity(intent);
     }
 
     @Override
