@@ -59,13 +59,13 @@ public class BeaconsActivity extends Activity {
     }
 
     public void setBeaconStatus(String uuid, Boolean status){
-        SaneJSONObject beaconInfo = application.getBeaconInfo(application.getAllBeaconInfo(), uuid);
-        beaconInfo.putBooleanOrIgnore("status", status);
-        application.setBeaconInfo(uuid, beaconInfo);
+        BeaconInfo beaconInfo = application.getBeaconInfo(uuid);
+        beaconInfo.status = status;
+        application.setBeaconInfo(uuid, beaconInfo.toJSON());
     }
 
-    private ArrayList<BeaconInfo> getBeaconInfo(){
-        SaneJSONObject beaconInfo = application.getAllBeaconInfo();
+    public ArrayList<BeaconInfo> getBeaconInfo(){
+        SaneJSONObject beaconInfo = application.getAllBeaconInfoJSON();
         Iterator<String> uuids = beaconInfo.keys();
         ArrayList<BeaconInfo> beacons = new ArrayList();
         while(uuids.hasNext()){

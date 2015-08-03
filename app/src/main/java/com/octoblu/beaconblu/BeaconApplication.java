@@ -2,7 +2,9 @@ package com.octoblu.beaconblu;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.github.nkzawa.emitter.Emitter;
 
@@ -112,25 +114,39 @@ public class BeaconApplication extends Application {
         preferences.commit();
     }
 
-    public SaneJSONObject getAllBeaconInfo(){
+    public SaneJSONObject getAllBeaconInfoJSON(){
         SharedPreferences preferences = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
         String jsonString = preferences.getString(BEACON_STATUSES_KEY, "{}");
         SaneJSONObject jsonObject = SaneJSONObject.fromString(jsonString);
         return jsonObject;
     }
 
-    public SaneJSONObject getBeaconInfo(SaneJSONObject beaconStatuses, String uuid){
+    public ArrayList<BeaconInfo> getAllBeaconInfo(){
+        SaneJSONObject jsonObject = getAllBeaconInfoJSON();
+        ArrayList<BeaconInfo> beacons = new ArrayList();
+        Iterator<String> uuids = jsonObject.keys();
+        while(uuids.hasNext()){
+            beacons.add(new BeaconInfo(jsonObject.getJSONOrNull(uuids.next())));
+        }
+        return beacons;
+    }
+
+    public SaneJSONObject getBeaconInfoJSON(SaneJSONObject beaconStatuses, String uuid){
         SaneJSONObject jsonObject = beaconStatuses.getJSONOrNull(uuid);
         return jsonObject;
     }
 
+    public @Nullable BeaconInfo getBeaconInfo(String uuid){
+        return meshbluBeacon.getBeaconInfo(getAllBeaconInfo(), uuid);
+    }
+
     public void loadBeaconInfo(){
-        SaneJSONObject beaconInfo = getAllBeaconInfo();
+        SaneJSONObject beaconInfo = getAllBeaconInfoJSON();
         Iterator<String> uuids = beaconInfo.keys();
         while(uuids.hasNext()){
             String uuid = uuids.next();
-            SaneJSONObject jsonObject = getBeaconInfo(beaconInfo, uuid);
-            meshbluBeacon.setBeaconInfo(uuid, jsonObject);
+            SaneJSONObject jsonObject = getBeaconInfoJSON(beaconInfo, uuid);
+            meshbluBeacon.setBeaconInfo(new BeaconInfo(jsonObject));
         }
     }
 
@@ -140,33 +156,28 @@ public class BeaconApplication extends Application {
 
     public void setBeaconInfo(String uuid, SaneJSONObject jsonObject){
         SharedPreferences.Editor preferences = getPreferencesEditor();
-        SaneJSONObject beaconStatuses = getAllBeaconInfo();
+        SaneJSONObject beaconStatuses = getAllBeaconInfoJSON();
         beaconStatuses.putJSONOrIgnore(uuid, jsonObject);
         preferences.putString(BEACON_STATUSES_KEY, beaconStatuses.toString());
         preferences.commit();
-        meshbluBeacon.setBeaconInfo(uuid, jsonObject);
+        BeaconInfo beaconInfo = meshbluBeacon.getBeaconInfo(getAllBeaconInfo(), uuid);
+        if(beaconInfo == null){
+            beaconInfo  = new BeaconInfo(jsonObject);
+        }
+
+        meshbluBeacon.setBeaconInfo(beaconInfo);
         emitter.emit(BEACONS_CHANGED);
     }
 
     private void didDiscoverBeacon(Beacon beacon){
         String uuid = beacon.getId1().toString();
-        SaneJSONObject jsonObject = getBeaconInfo(getAllBeaconInfo(), uuid);
+        SaneJSONObject jsonObject = getBeaconInfoJSON(getAllBeaconInfoJSON(), uuid);
         if(jsonObject == null){
             jsonObject = new SaneJSONObject().fromString("{}");
         }
         jsonObject.putBooleanOrIgnore("status", false);
         jsonObject.putOrIgnore("name", beacon.getBluetoothName());
-        jsonObject.putOrIgnore("uuid", beacon.getBluetoothName());
-        setBeaconInfo(uuid, jsonObject);
-    }
-
-    private void setBeaconRangeChange(Beacon beacon, Double distance){
-        String uuid = beacon.getId1().toString();
-        SaneJSONObject jsonObject = getBeaconInfo(getAllBeaconInfo(), uuid);
-        if(jsonObject == null){
-            jsonObject = new SaneJSONObject().fromString("{}");
-        }
-        jsonObject.putDoubleOrIgnore("range_change", distance);
+        jsonObject.putOrIgnore("uuid", uuid);
         setBeaconInfo(uuid, jsonObject);
     }
 

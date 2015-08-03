@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.github.nkzawa.emitter.Emitter;
 
@@ -26,9 +27,11 @@ import org.json.JSONObject;
 
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +46,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     private List<String> beaconTypes;
     private Context context;
     private BeaconManager beaconManager;
-    private Map<String, SaneJSONObject> beaconInfo = new HashMap();
+    private ArrayList<BeaconInfo> beaconInfo = new ArrayList();
     public final class BEACON_TYPES {
         public static final String ESTIMOTE = "Estimote";
         public static final String IBEACON = "iBeacon";
@@ -229,6 +232,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     }
 
     private void sendBeaconChangeMessage(Beacon beacon){
+        String uuid = beacon.getId1().toString();
         // Payload
         SaneJSONObject payload = new SaneJSONObject();
         payload.putOrIgnore("platform", "android");
@@ -236,7 +240,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
 
         // Beacon
         SaneJSONObject beaconJSON = new SaneJSONObject();
-        beaconJSON.putOrIgnore("uuid", beacon.getId1().toString());
+        beaconJSON.putOrIgnore("uuid", uuid);
         payload.putJSONOrIgnore("beacon", beaconJSON);
 
         // Proximity
@@ -251,8 +255,14 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         message.putOrIgnore("topic", "location_update");
 
         // Send
-        meshblu.message(message);
-        emitter.emit(EVENTS.LOCATION_UPDATE, payload);
+        BeaconInfo beaconInfo = getBeaconInfo(this.beaconInfo, uuid);
+        Double distance = beacon.getDistance();
+        if(beaconInfo.hasChangedDistance(distance)){
+            Log.d(TAG, String.format("Changed significant distance! %s %f %f", uuid.substring(0, 8), distance, beaconInfo.lastDistance));
+            meshblu.message(message);
+            emitter.emit(EVENTS.LOCATION_UPDATE, payload);
+        }
+        beaconInfo.setLastDistance(distance);
     }
 
     private SaneJSONObject getProximity(Beacon beacon){
@@ -280,14 +290,26 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     }
 
     private @Nullable Boolean isBeaconEnabled(String uuid){
-        if(!beaconInfo.containsKey(uuid)){
+        BeaconInfo beacon = getBeaconInfo(beaconInfo, uuid);
+        if(beacon == null){
             return null;
         }
-        return beaconInfo.get(uuid).getBoolean("status", false);
+        return beacon.status;
     }
 
-    public void setBeaconInfo(String uuid, SaneJSONObject info){
-        beaconInfo.put(uuid, info);
+    public @Nullable BeaconInfo getBeaconInfo(ArrayList<BeaconInfo>beaconInfo, String uuid){
+        Iterator<BeaconInfo> iterator = beaconInfo.iterator();
+        while(iterator.hasNext()){
+            BeaconInfo beacon = iterator.next();
+            if(beacon.uuid != null && beacon.uuid.equals(uuid)){
+                return beacon;
+            }
+        }
+        return null;
+    }
+
+    public void setBeaconInfo(BeaconInfo info){
+        beaconInfo.add(info);
     }
 
     private void verifyBluetooth() {
