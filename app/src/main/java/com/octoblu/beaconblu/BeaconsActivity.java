@@ -1,7 +1,9 @@
 package com.octoblu.beaconblu;
 
+import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,7 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class BeaconsActivity extends ActionBarActivity {
+public class BeaconsActivity extends Activity {
+    private static final String TAG = "BeaconsActivity";
     ListView listView;
     private BeaconApplication application;
 
@@ -56,31 +59,16 @@ public class BeaconsActivity extends ActionBarActivity {
 
         SaneJSONObject beaconInfo = application.getAllBeaconInfo();
         Iterator<String> uuids = beaconInfo.keys();
-        List<String> values = new ArrayList<String>();
+        ArrayList<BeaconInfo> beacons = new ArrayList();
         while(uuids.hasNext()){
-            values.add(uuids.next());
+            String uuid = uuids.next();
+            SaneJSONObject jsonObject = beaconInfo.getJSONOrNull(uuid);
+            jsonObject.putOrIgnore("uuid", uuid);
+            Log.d(TAG, String.format("Beacon added to array %s", uuid));
+            beacons.add(new BeaconInfo(jsonObject));
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, android.R.id.text1, values);
+        BeaconAdapter adapter = new BeaconAdapter(this, beacons);
         listView.setAdapter(adapter);
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-
-                // ListView Clicked item index
-                int itemPosition = position;
-
-                // ListView Clicked item value
-                String itemValue = (String) listView.getItemAtPosition(position);
-
-                // Show Alert
-                Toast.makeText(getApplicationContext(),
-                        "Position :" + itemPosition + "  ListItem : " + itemValue, Toast.LENGTH_LONG)
-                        .show();
-
-            }
-        });
     }
 }

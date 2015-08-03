@@ -58,7 +58,7 @@ public class BeaconApplication extends Application {
             public void call(Object... args) {
                 Log.d(TAG, "Discovered beacon");
                 Beacon beacon = (Beacon) args[0];
-                setBeaconStatus(beacon, true);
+                didRangeBeacon(beacon);
             }
         });
 
@@ -141,13 +141,15 @@ public class BeaconApplication extends Application {
         meshbluBeacon.setBeaconInfo(uuid, jsonObject);
     }
 
-    private void setBeaconStatus(Beacon beacon, Boolean status){
+    private void didRangeBeacon(Beacon beacon){
         String uuid = beacon.getId1().toString();
         SaneJSONObject jsonObject = getBeaconInfo(getAllBeaconInfo(), uuid);
         if(jsonObject == null){
             jsonObject = new SaneJSONObject().fromString("{}");
         }
-        jsonObject.putBooleanOrIgnore("status", status);
+        jsonObject.putBooleanOrIgnore("status", false);
+        jsonObject.putOrIgnore("name", beacon.getBluetoothName());
+        jsonObject.putOrIgnore("uuid", beacon.getBluetoothName());
         setBeaconInfo(uuid, jsonObject);
     }
 
