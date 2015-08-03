@@ -34,6 +34,14 @@ public class SaneJSONObject extends JSONObject {
         }
     }
 
+    public Boolean getBoolean(@Nullable String name, Boolean def) {
+        try {
+            return this.getBoolean(name);
+        } catch (JSONException e) {
+            return def;
+        }
+    }
+
     public String getStringOrThrow(@Nullable String name) {
         String value = getStringOrNull(name);
         if (value == null) {
@@ -43,6 +51,14 @@ public class SaneJSONObject extends JSONObject {
     }
 
     public void putOrIgnore(@Nullable String name, @Nullable String value){
+        try {
+            put(name, value);
+        } catch (JSONException e) {
+            return;
+        }
+    }
+
+    public void putBooleanOrIgnore(@Nullable String name, Boolean value){
         try {
             put(name, value);
         } catch (JSONException e) {

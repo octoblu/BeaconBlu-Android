@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -26,7 +27,9 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     private static final String TAG = "MeshbluBeacon";
@@ -39,6 +42,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     private List<String> beaconTypes;
     private Context context;
     private BeaconManager beaconManager;
+    private Map<String, Boolean> beaconStatuses = new HashMap();
     public final class BEACON_TYPES {
         public static final String ESTIMOTE = "Estimote";
         public static final String IBEACON = "iBeacon";
@@ -51,6 +55,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         public static final String DID_ENTER_REGION = "did_enter_region";
         public static final String DID_EXIT_REGION = "did_exit_region";
         public static final String REGION_STATE_CHANGE = "region_state_change";
+        public static final String DISCOVERED_BEACON = "discovered_beacon";
     }
     public MeshbluBeacon(SaneJSONObject meshbluConfig, Context context){
         this.meshblu = new Meshblu(meshbluConfig, context);
@@ -212,7 +217,13 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
             DecimalFormat df = new DecimalFormat("#.000");
             String distance = df.format(beacon.getDistance());
             Log.d(TAG, "Beacon (" + uuid.substring(0, 8) + ") is about " + distance + " meters away.");
-            sendBeaconChangeMessage(beacon);
+
+            if(isBeaconEnabled(uuid)){
+                sendBeaconChangeMessage(beacon);
+            }else{
+                emitter.emit(EVENTS.DISCOVERED_BEACON, beacon);
+            }
+
         }
     }
 
@@ -265,6 +276,17 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         Long time = new Date().getTime();
         proximityJSON.putOrIgnore("timestamp", new Timestamp(time).toString());
         return proximityJSON;
+    }
+
+    private Boolean isBeaconEnabled(String uuid){
+        if(!beaconStatuses.containsKey(uuid)){
+            return false;
+        }
+        return beaconStatuses.get(uuid);
+    }
+
+    public void setBeaconStatus(String uuid, Boolean status){
+        beaconStatuses.put(uuid, status);
     }
 
     private void verifyBluetooth() {

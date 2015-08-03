@@ -6,10 +6,12 @@ import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
 
+import org.altbeacon.beacon.Beacon;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,7 @@ import static com.octoblu.beaconblu.MeshbluBeacon.BEACON_TYPES.IBEACON;
 public class BeaconApplication extends Application {
     private static final String TAG = "BeaconApplication";
     private static final String PREFERENCES_FILE_NAME = "meshblu_preferences";
+    private static final String BEACON_STATUSES_KEY = "beacon_statuses";
     private static final String UUID = "uuid";
     private static final String TOKEN = "token";
     private MeshbluBeacon meshbluBeacon;
@@ -50,7 +53,17 @@ public class BeaconApplication extends Application {
             }
         });
 
+        meshbluBeacon.on(MeshbluBeacon.EVENTS.DISCOVERED_BEACON, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "Discovered beacon");
+                Beacon beacon = (Beacon) args[0];
+                setBeaconStatus(beacon, true);
+            }
+        });
+
         meshbluBeacon.start(getBeaconTypeList());
+        loadBeaconStatuses();
     }
 
     private SharedPreferences.Editor getPreferencesEditor() {
@@ -95,6 +108,32 @@ public class BeaconApplication extends Application {
         preferences.putBoolean(EASIBEACON, types.get(EASIBEACON));
         preferences.putBoolean(ALTBEACON, types.get(ALTBEACON));
         preferences.commit();
+    }
+
+    private SaneJSONObject getBeaconStatuses(){
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES_FILE_NAME, 0);
+        String jsonString = preferences.getString(BEACON_STATUSES_KEY, "{}");
+        SaneJSONObject jsonObject = SaneJSONObject.fromString(jsonString);
+        return jsonObject;
+    }
+
+    public void loadBeaconStatuses(){
+        SaneJSONObject jsonObject = getBeaconStatuses();
+        Iterator<String> uuids = jsonObject.keys();
+        while(uuids.hasNext()){
+            String uuid = uuids.next();
+            meshbluBeacon.setBeaconStatus(uuid, jsonObject.getBoolean(uuid, false));
+        }
+    }
+
+    private void setBeaconStatus(Beacon beacon, Boolean status){
+        String uuid = beacon.getId1().toString();
+        SharedPreferences.Editor preferences = getPreferencesEditor();
+        SaneJSONObject jsonObject = getBeaconStatuses();
+        jsonObject.putBooleanOrIgnore(uuid, status);
+        preferences.putString(BEACON_STATUSES_KEY, jsonObject.toString());
+        preferences.commit();
+        meshbluBeacon.setBeaconStatus(uuid, status);
     }
 
     private SaneJSONObject getCredentials(){
