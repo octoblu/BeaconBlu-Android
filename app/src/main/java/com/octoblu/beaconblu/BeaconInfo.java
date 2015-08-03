@@ -10,7 +10,7 @@ public class BeaconInfo {
     public String uuid;
     public Boolean status;
     public String name;
-    public Double distanceRange = 2.0;
+    public Double sensitivity = 2.0;
     public Double lastDistance = 0.0;
 
     public BeaconInfo(String name, String uuid, Boolean status){
@@ -30,9 +30,9 @@ public class BeaconInfo {
     }
 
     public Boolean hasChangedDistance(Double distance){
-        if(distance > (lastDistance + distanceRange)){
+        if(distance > (lastDistance + sensitivity)){
             return true;
-        }else if(distance < (lastDistance - distanceRange)){
+        }else if(distance < (lastDistance - sensitivity)){
             return true;
         }
         return false;
