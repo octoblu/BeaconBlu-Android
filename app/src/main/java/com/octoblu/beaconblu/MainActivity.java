@@ -2,6 +2,7 @@ package com.octoblu.beaconblu;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.LabeledIntent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -88,6 +89,8 @@ public class MainActivity extends Activity {
         easibeacon.setChecked(beaconTypes.get(MeshbluBeacon.BEACON_TYPES.EASIBEACON));
         CheckBox altbeacon = (CheckBox) findViewById(R.id.checkbox_altbeacon);
         altbeacon.setChecked(beaconTypes.get(MeshbluBeacon.BEACON_TYPES.ALTBEACON));
+        LinearLayout closeApplication = (LinearLayout)findViewById(R.id.close_application);
+        closeApplication.setVisibility(LinearLayout.VISIBLE);
     }
 
     public void onCheckboxClicked(View view) {
