@@ -9,6 +9,31 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:id="@+id/claim_beacon_blu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/claim_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:textAlignment="center"
+            android:paddingLeft="7dp"
+            android:paddingTop="5dp"
+            android:singleLine="false"
+            android:textSize="13sp"
+            android:text="You must claim this device in Octoblu to transmit beacons"/>
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/claim_app"
+            android:onClick="claimBeaconBlu" />
+
+    </LinearLayout>
 
     <Button
         android:layout_width="fill_parent"
@@ -16,37 +41,90 @@
         android:text="@string/view_beacons"
         android:onClick="openBeaconsActivity" />
 
-    <TextView
-        android:text="@string/beacon_types"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="bottom"
+        android:orientation="vertical">
 
-    <CheckBox
-        android:id="@+id/checkbox_estimote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/estimote"
-        android:onClick="onCheckboxClicked"/>
+        <TextView
+            android:text="@string/beacon_types"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="18dp"
+            android:textColor="#676767"
+            />
 
-    <CheckBox
-        android:id="@+id/checkbox_ibeacon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ibeacon"
-        android:onClick="onCheckboxClicked"/>
+        <RelativeLayout
+            android:id="@+id/row1"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
 
-    <CheckBox
-        android:id="@+id/checkbox_easibeacon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/easibeacon"
-        android:onClick="onCheckboxClicked"/>
+            <CheckBox
+                android:id="@+id/checkbox_estimote"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/estimote"
+                android:onClick="onCheckboxClicked"/>
 
-    <CheckBox
-        android:id="@+id/checkbox_altbeacon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/altbeacon"
-        android:onClick="onCheckboxClicked"/>
+            <CheckBox
+                android:id="@+id/checkbox_ibeacon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ibeacon"
+                android:layout_gravity="right"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="64dp"
+                android:onClick="onCheckboxClicked"/>
+
+        </RelativeLayout>
+
+
+        <RelativeLayout
+            android:id="@+id/row2"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/checkbox_easibeacon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/easibeacon"
+                android:onClick="onCheckboxClicked"/>
+
+            <CheckBox
+                android:id="@+id/checkbox_altbeacon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/altbeacon"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="right"
+                android:layout_marginRight="50dp"
+                android:onClick="onCheckboxClicked"/>
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/restart_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:gravity="left|center"
+            android:paddingLeft="7dp"
+            android:paddingTop="5dp"
+            android:singleLine="false"
+            android:textSize="13sp"
+            android:text="Must restart application after changing..."/>
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/close_application"
+            android:onClick="closeApplication" />
+    </LinearLayout>
 
 </LinearLayout>

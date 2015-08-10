@@ -11,5 +11,7 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="view_beacons">View Beacons</string>
+    <string name="close_application">Close Application</string>
+    <string name="claim_app">Claim BeaconBlu</string>
     <string name="title_activity_beacon_row">BeaconRow</string>
 </resources>

@@ -35,7 +35,7 @@ public class Meshblu extends Emitter {
 
     private String MESHBLU_URL = "https://meshblu.octoblu.com";
     private final Context context;
-    private String uuid, token;
+    public String uuid, token;
 
 
     public Meshblu(SaneJSONObject meshbluConfig, Context context){

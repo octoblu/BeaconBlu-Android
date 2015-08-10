@@ -2,19 +2,26 @@ package com.octoblu.beaconblu;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
+
+import com.github.nkzawa.emitter.Emitter;
 
 import org.altbeacon.beacon.Beacon;
+import org.json.JSONObject;
 
 import java.util.Map;
 
 
 public class MainActivity extends Activity {
+    private static final String TAG = "MainActivity";
     private BeaconApplication application;
     private Map<String, Boolean> beaconTypes;
 
@@ -24,9 +31,52 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         application = (BeaconApplication) getApplication();
+
+        application.on(BeaconApplication.WHOAMI, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                SaneJSONObject jsonObject = (SaneJSONObject) args[0];
+                if(jsonObject.getStringOrNull("owner") == null){
+                    showOrHideClaimInfo(true);
+                }else{
+                    showOrHideClaimInfo(false);
+                }
+            }
+        });
+        application.on(BeaconApplication.CLAIM_GATEBLU, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String uuid = (String) args[0];
+                String token = (String) args[1];
+                claimDeviceInOctoblu(uuid, token);
+            }
+        });
         beaconTypes = application.getBeaconTypes();
 
         setCheckedBoxes();
+        showOrHideClaimInfo(false);
+    }
+
+    public void claimBeaconBlu(View view){
+        Log.d(TAG, "I wants to claim gateblu");
+        application.claimDevice();
+    }
+
+    private void claimDeviceInOctoblu(String uuid, String token){
+        String url = String.format("https://app.octoblu.com/node-wizard/claim/%s/%s", uuid, token);
+        Uri uriUrl = Uri.parse(url);
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
+        application.whoami();
+    }
+
+    private void showOrHideClaimInfo(Boolean show){
+        LinearLayout claimInfo = (LinearLayout) findViewById(R.id.claim_beacon_blu);
+        if(show){
+            claimInfo.setVisibility(LinearLayout.VISIBLE);
+        }else{
+            claimInfo.setVisibility(LinearLayout.GONE);
+        }
     }
 
     private void setCheckedBoxes(){
@@ -66,6 +116,10 @@ public class MainActivity extends Activity {
     public void openBeaconsActivity(View view){
         Intent intent = new Intent(this, BeaconsActivity.class);
         MainActivity.this.startActivity(intent);
+    }
+
+    public void closeApplication(View view){
+        System.exit(1);
     }
 
     @Override

@@ -55,6 +55,8 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     }
     public final class EVENTS {
         public static final String REGISTER = "register";
+        public static final String GENERATED_TOKEN = "generate_token";
+        public static final String WHOAMI = "whoami";
         public static final String LOCATION_UPDATE = "location_update";
         public static final String DID_ENTER_REGION = "did_enter_region";
         public static final String DID_EXIT_REGION = "did_exit_region";
@@ -93,6 +95,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         }else{
             Log.d(TAG, "Device is registered, starting...");
             startBeaconMonitoring();
+            getDevice();
         }
     }
 
@@ -105,8 +108,30 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
                 JSONObject deviceJSON = (JSONObject) args[0];
                 setCredentials(SaneJSONObject.fromJSONObject(deviceJSON));
                 startBeaconMonitoring();
+                getDevice();
             }
         });
+        meshblu.on(Meshblu.WHOAMI, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "Whoami");
+                emitter.emit(EVENTS.WHOAMI, args);
+            }
+        });
+        meshblu.on(Meshblu.GENERATED_TOKEN, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                emitter.emit(EVENTS.GENERATED_TOKEN, args);
+            }
+        });
+    }
+
+    public void getDevice(){
+        meshblu.whoami();
+    }
+
+    public void generateToken(){
+        meshblu.generateToken(meshblu.uuid);
     }
 
     public void startBeaconMonitoring(){

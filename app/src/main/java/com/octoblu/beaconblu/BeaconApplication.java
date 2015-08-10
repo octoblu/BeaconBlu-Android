@@ -28,10 +28,13 @@ public class BeaconApplication extends Application {
     private static final String PREFERENCES_FILE_NAME = "meshblu_preferences";
     private static final String BEACON_STATUSES_KEY = "beacon_info";
     public static final String BEACONS_CHANGED = "beacons_changed";
+    public static final String WHOAMI = "meshblu_whoami";
+    public static final String CLAIM_GATEBLU = "claim_gateblu";
     private static final String UUID = "uuid";
     private static final String TOKEN = "token";
     private Emitter emitter = new Emitter();
     private MeshbluBeacon meshbluBeacon;
+    private Boolean claimingDevice = false;
 
     public void onCreate() {
         super.onCreate();
@@ -66,8 +69,58 @@ public class BeaconApplication extends Application {
             }
         });
 
+        meshbluBeacon.on(MeshbluBeacon.EVENTS.WHOAMI, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "Got whoami");
+                JSONObject jsonObject = (JSONObject) args[0];
+                gotWhoami(jsonObject);
+            }
+        });
+
+        meshbluBeacon.on(MeshbluBeacon.EVENTS.GENERATED_TOKEN, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "Got token");
+                JSONObject JSONObject = (JSONObject) args[0];
+                SaneJSONObject deviceJSON = SaneJSONObject.fromJSONObject(JSONObject);
+                if (claimingDevice) {
+                    String uuid = deviceJSON.getStringOrNull("uuid");
+                    String token = deviceJSON.getStringOrNull("token");
+                    emitter.emit(CLAIM_GATEBLU, uuid, token);
+                }
+            }
+        });
+
         meshbluBeacon.start(getBeaconTypeList());
         loadBeaconInfo();
+    }
+
+    public void whoami(){
+        meshbluBeacon.getDevice();
+    }
+
+    public void claimDevice(){
+        claimingDevice = true;
+        meshbluBeacon.generateToken();
+    }
+
+    private void gotWhoami(JSONObject jsonObject){
+        SaneJSONObject deviceJSON = new SaneJSONObject().fromJSONObject(jsonObject);
+        if(deviceJSON.getStringOrNull("owner") != null){
+            claimingDevice = false;
+        }
+        emitter.emit(WHOAMI, deviceJSON);
+
+        if(claimingDevice){
+            new android.os.Handler().postDelayed(
+                    new Runnable() {
+                        public void run() {
+                            Log.i(TAG, "Check whoami again...");
+                            meshbluBeacon.getDevice();
+                        }
+                    }, 10000);
+        }
     }
 
     private SharedPreferences.Editor getPreferencesEditor() {
