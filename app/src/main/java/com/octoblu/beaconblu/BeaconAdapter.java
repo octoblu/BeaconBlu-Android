@@ -43,6 +43,9 @@ public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
             }
         });
 
+        TextView rangeNumber = (TextView) convertView.findViewById(R.id.sensitivity_range);
+        rangeNumber.setText(String.format("%dm", Math.round(beacon.sensitivityDistance)));
+
         volumeControl = (SeekBar) convertView.findViewById(R.id.sensitivity_bar);
 
         volumeControl.setProgress(beacon.sensitivity);

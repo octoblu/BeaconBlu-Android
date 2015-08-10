@@ -58,15 +58,27 @@ android:gravity="left|center">
         android:layout_below="@+id/linear">
 
         <TextView
-            android:id="@+id/sensitivity"
+            android:id="@+id/sensitivity_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
             android:gravity="left|center"
             android:paddingLeft="7dp"
-            android:layout_marginTop="17dp"
-            android:singleLine="false"
+            android:paddingTop="17dp"
             android:textSize="14sp"
+            android:textColor="#373737"
             android:text="Sensitivity"/>
+
+        <TextView
+            android:id="@+id/sensitivity_range"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right|center"
+            android:paddingLeft="7dp"
+            android:paddingTop="17dp"
+            android:textSize="14sp"
+            android:textColor="#898989"
+            android:text="20m"/>
 
         <SeekBar
             android:id="@+id/sensitivity_bar"
@@ -74,6 +86,7 @@ android:gravity="left|center">
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:progress="20"/>
+
 
     </LinearLayout>
 

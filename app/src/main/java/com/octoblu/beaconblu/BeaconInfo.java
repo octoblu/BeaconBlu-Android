@@ -13,7 +13,7 @@ public class BeaconInfo {
     public Integer sensitivity = 50;
     public Double lastDistance = 0.0;
     public Double sensitivityDistance = 2.0;
-    private final Double MAX_SENSITIVITY = 4.0;
+    private final Double MAX_SENSITIVITY = 10.0;
 
     public BeaconInfo(SaneJSONObject jsonObject){
         loadFromJSON(jsonObject);
@@ -45,7 +45,7 @@ public class BeaconInfo {
     }
 
     private void calculateSensitivity(){
-        sensitivityDistance = ((sensitivity / 100.0) * MAX_SENSITIVITY) % MAX_SENSITIVITY;
+        sensitivityDistance = ((sensitivity / 100.0) * MAX_SENSITIVITY);
     }
 
     public Boolean hasChangedDistance(Double distance){
