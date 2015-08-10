@@ -89,8 +89,6 @@ public class MainActivity extends Activity {
         easibeacon.setChecked(beaconTypes.get(MeshbluBeacon.BEACON_TYPES.EASIBEACON));
         CheckBox altbeacon = (CheckBox) findViewById(R.id.checkbox_altbeacon);
         altbeacon.setChecked(beaconTypes.get(MeshbluBeacon.BEACON_TYPES.ALTBEACON));
-        LinearLayout closeApplication = (LinearLayout)findViewById(R.id.close_application);
-        closeApplication.setVisibility(LinearLayout.VISIBLE);
     }
 
     public void onCheckboxClicked(View view) {
@@ -114,6 +112,9 @@ public class MainActivity extends Activity {
         }
 
         application.setBeaconTypes(beaconTypes);
+
+        LinearLayout closeApplication = (LinearLayout)findViewById(R.id.close_application);
+        closeApplication.setVisibility(LinearLayout.VISIBLE);
     }
 
     public void openBeaconsActivity(View view){
