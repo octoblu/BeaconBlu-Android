@@ -6,11 +6,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
+    private SeekBar volumeControl = null;
+
     public BeaconAdapter(Context context, ArrayList<BeaconInfo> beacons) {
         super(context, 0, beacons);
     }
@@ -38,6 +42,29 @@ public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
                 onCheckboxClicked(position, checked);
             }
         });
+
+        volumeControl = (SeekBar) convertView.findViewById(R.id.sensitivity_bar);
+
+        volumeControl.setProgress(beacon.sensitivity);
+
+        volumeControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChanged = 0;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                BeaconsActivity context = (BeaconsActivity) getContext();
+                BeaconInfo beacon = getItem(position);
+                context.setSensitivity(beacon.uuid, progressChanged);
+            }
+        });
+
         // Return the completed view to render on screen
         return convertView;
     }

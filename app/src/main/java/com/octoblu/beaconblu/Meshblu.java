@@ -46,10 +46,7 @@ public class Meshblu extends Emitter {
     public void setCredentials(SaneJSONObject meshbluConfig){
         this.uuid = meshbluConfig.getStringOrNull("uuid");
         this.token = meshbluConfig.getStringOrNull("token");
-        Integer port = meshbluConfig.getIntOrNull("port");
-        if(port == null){
-            port = 80;
-        }
+        Integer port = meshbluConfig.getInteger("port", 80);
         String portString = "";
         String protocol = "http";
         switch(port){

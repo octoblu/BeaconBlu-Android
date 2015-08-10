@@ -258,7 +258,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         BeaconInfo beaconInfo = getBeaconInfo(this.beaconInfo, uuid);
         Double distance = beacon.getDistance();
         if(beaconInfo.hasChangedDistance(distance)){
-            Log.d(TAG, String.format("Changed significant distance! %s %f %f", uuid.substring(0, 8), distance, beaconInfo.lastDistance));
+            Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), beaconInfo.sensitivityDistance, distance, beaconInfo.lastDistance));
             meshblu.message(message);
             emitter.emit(EVENTS.LOCATION_UPDATE, payload);
         }
@@ -308,9 +308,31 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         return null;
     }
 
-    public void setBeaconInfo(BeaconInfo info){
-        beaconInfo.add(info);
+    public void updateInfo(BeaconInfo info){
+        Iterator<BeaconInfo> iterator = beaconInfo.iterator();
+        Integer index = 0;
+        Integer foundIndex = -1;
+        while(iterator.hasNext()){
+            BeaconInfo beacon = iterator.next();
+            if(beacon.uuid != null && beacon.uuid.equals(info.uuid)){
+                foundIndex = index;
+            }
+            index++;
+        }
+        if(foundIndex >= 0){
+            beaconInfo.set(foundIndex, info);
+        }
     }
+
+    public void setBeaconInfo(BeaconInfo info){
+        BeaconInfo lastInfo = getBeaconInfo(beaconInfo, info.uuid);
+        if(lastInfo == null) {
+            beaconInfo.add(info);
+        }else{
+            updateInfo(info);
+        }
+    }
+
 
     private void verifyBluetooth() {
 

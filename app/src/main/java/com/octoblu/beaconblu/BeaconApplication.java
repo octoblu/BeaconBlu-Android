@@ -157,13 +157,17 @@ public class BeaconApplication extends Application {
     public void setBeaconInfo(String uuid, SaneJSONObject jsonObject){
         SharedPreferences.Editor preferences = getPreferencesEditor();
         SaneJSONObject beaconStatuses = getAllBeaconInfoJSON();
-        beaconStatuses.putJSONOrIgnore(uuid, jsonObject);
-        preferences.putString(BEACON_STATUSES_KEY, beaconStatuses.toString());
-        preferences.commit();
+
         BeaconInfo beaconInfo = meshbluBeacon.getBeaconInfo(getAllBeaconInfo(), uuid);
         if(beaconInfo == null){
             beaconInfo  = new BeaconInfo(jsonObject);
+        }else{
+            beaconInfo.loadFromJSON(jsonObject);
         }
+
+        beaconStatuses.putJSONOrIgnore(uuid, jsonObject);
+        preferences.putString(BEACON_STATUSES_KEY, beaconStatuses.toString());
+        preferences.commit();
 
         meshbluBeacon.setBeaconInfo(beaconInfo);
         emitter.emit(BEACONS_CHANGED);

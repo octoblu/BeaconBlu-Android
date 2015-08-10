@@ -3,49 +3,78 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:gravity="left|center">
 
-<LinearLayout
-    android:id="@+id/linear"
-    android:layout_height="wrap_content"
-    android:layout_width="wrap_content"
-    android:orientation="vertical">
-
-
-    <TextView
-        android:id="@+id/name"
+    <CheckBox
+        android:id="@+id/status_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:ellipsize="end"
-        android:gravity="left|center"
-        android:paddingLeft="7dp"
-        android:paddingTop="5dp"
-        android:singleLine="false"
-        android:textColor="#FF00B8FF"
-        android:textSize="14sp"
-        android:text="Name"/>
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="13dp"
+        android:onClick="onCheckboxClicked"/>
 
-    <TextView
-        android:id="@+id/uuid"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/linear"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:ellipsize="end"
-        android:gravity="left|center"
-        android:paddingBottom="14dp"
-        android:paddingLeft="7dp"
-        android:singleLine="false"
-        android:textSize="14sp"
-        android:text="UUID"/>
+        android:layout_width="wrap_content"
+        android:orientation="vertical">
 
-</LinearLayout>
 
-<CheckBox
-    android:id="@+id/status_checkbox"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center_vertical"
-    android:layout_alignBottom="@id/linear"
-    android:layout_alignTop="@id/linear"
-    android:layout_alignParentRight="true"
-    android:onClick="onCheckboxClicked"/>
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:gravity="left|center"
+            android:paddingLeft="7dp"
+            android:paddingTop="5dp"
+            android:singleLine="false"
+            android:textColor="#FF00B8FF"
+            android:textSize="14sp"
+            android:text="Name"/>
+
+        <TextView
+            android:id="@+id/uuid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:gravity="left|center"
+            android:paddingBottom="14dp"
+            android:paddingLeft="7dp"
+            android:singleLine="false"
+            android:textSize="14sp"
+            android:text="UUID"/>
+
+
+    </LinearLayout>
+
+
+
+    <LinearLayout
+        android:id="@+id/sensitivity_linear"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/linear">
+
+        <TextView
+            android:id="@+id/sensitivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left|center"
+            android:paddingLeft="7dp"
+            android:layout_marginTop="17dp"
+            android:singleLine="false"
+            android:textSize="14sp"
+            android:text="Sensitivity"/>
+
+        <SeekBar
+            android:id="@+id/sensitivity_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:progress="20"/>
+
+    </LinearLayout>
+
 </RelativeLayout>

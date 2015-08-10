@@ -10,29 +10,49 @@ public class BeaconInfo {
     public String uuid;
     public Boolean status;
     public String name;
-    public Double sensitivity = 2.0;
+    public Integer sensitivity = 50;
     public Double lastDistance = 0.0;
-
-    public BeaconInfo(String name, String uuid, Boolean status){
-        this.name = name;
-        this.uuid = uuid;
-        this.status = status;
-    }
+    public Double sensitivityDistance = 2.0;
+    private final Double MAX_SENSITIVITY = 4.0;
 
     public BeaconInfo(SaneJSONObject jsonObject){
-        this.name = jsonObject.getStringOrNull("name");
-        this.uuid = jsonObject.getStringOrNull("uuid");
-        this.status = jsonObject.getBoolean("status", false);
+        loadFromJSON(jsonObject);
+        calculateSensitivity();
+    }
+
+    public void loadFromJSON(SaneJSONObject jsonObject){
+        String newName = jsonObject.getStringOrNull("name");
+        if(newName == null || newName.length() == 0){
+            name = "Unknown Name";
+        }else{
+            name = newName;
+        }
+        String newUuid = jsonObject.getStringOrNull("uuid");
+        if(newUuid == null || newUuid.length() == 0){
+            uuid = "Unknown UUID";
+        }else{
+            uuid = newUuid;
+        }
+        status = jsonObject.getBoolean("status", false);
+        Integer newSensitivity = jsonObject.getInteger("sensitivity", -1);
+        if(newSensitivity >= 0){
+            sensitivity = newSensitivity;
+        }
     }
 
     public void setLastDistance(Double lastDistance){
         this.lastDistance = lastDistance;
     }
 
+    private void calculateSensitivity(){
+        sensitivityDistance = ((sensitivity / 100.0) * MAX_SENSITIVITY) % MAX_SENSITIVITY;
+    }
+
     public Boolean hasChangedDistance(Double distance){
-        if(distance > (lastDistance + sensitivity)){
+        calculateSensitivity();
+        if(distance > (lastDistance + sensitivityDistance)){
             return true;
-        }else if(distance < (lastDistance - sensitivity)){
+        }else if(distance < (lastDistance - sensitivityDistance)){
             return true;
         }
         return false;
@@ -43,6 +63,7 @@ public class BeaconInfo {
         jsonObject.putBooleanOrIgnore("status", status);
         jsonObject.putOrIgnore("name", name);
         jsonObject.putOrIgnore("uuid", uuid);
+        jsonObject.putIntOrIgnore("sensitivity", sensitivity);
         return jsonObject;
     }
 }

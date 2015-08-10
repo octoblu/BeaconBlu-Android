@@ -26,11 +26,11 @@ public class SaneJSONObject extends JSONObject {
         }
     }
 
-    public Integer getIntOrNull(@Nullable String name) {
+    public Integer getInteger(@Nullable String name, Integer value) {
         try {
             return this.getInt(name);
         } catch (JSONException e) {
-            return null;
+            return value;
         }
     }
 

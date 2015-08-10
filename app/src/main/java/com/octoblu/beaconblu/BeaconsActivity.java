@@ -64,6 +64,12 @@ public class BeaconsActivity extends Activity {
         application.setBeaconInfo(uuid, beaconInfo.toJSON());
     }
 
+    public void setSensitivity(String uuid, Integer sensitivity){
+        BeaconInfo beaconInfo = application.getBeaconInfo(uuid);
+        beaconInfo.sensitivity = sensitivity;
+        application.setBeaconInfo(uuid, beaconInfo.toJSON());
+    }
+
     public ArrayList<BeaconInfo> getBeaconInfo(){
         SaneJSONObject beaconInfo = application.getAllBeaconInfoJSON();
         Iterator<String> uuids = beaconInfo.keys();
