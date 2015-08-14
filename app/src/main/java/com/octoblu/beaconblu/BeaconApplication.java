@@ -184,6 +184,10 @@ public class BeaconApplication extends Application {
         return beacons;
     }
 
+    public ArrayList<BeaconInfo> getCurrentBeaconInfo(){
+        return meshbluBeacon.beaconInfo;
+    }
+
     public SaneJSONObject getBeaconInfoJSON(SaneJSONObject beaconStatuses, String uuid){
         SaneJSONObject jsonObject = beaconStatuses.getJSONOrNull(uuid);
         return jsonObject;

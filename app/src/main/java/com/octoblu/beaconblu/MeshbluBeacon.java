@@ -46,7 +46,7 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
     private List<String> beaconTypes;
     private Context context;
     private BeaconManager beaconManager;
-    private ArrayList<BeaconInfo> beaconInfo = new ArrayList();
+    public ArrayList<BeaconInfo> beaconInfo = new ArrayList();
     public final class BEACON_TYPES {
         public static final String ESTIMOTE = "Estimote";
         public static final String IBEACON = "iBeacon";
@@ -283,7 +283,6 @@ public class MeshbluBeacon implements BootstrapNotifier, BeaconConsumer {
         BeaconInfo beaconInfo = getBeaconInfo(this.beaconInfo, uuid);
         Double distance = beacon.getDistance();
         if(beaconInfo.hasChangedDistance(distance)){
-            Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), beaconInfo.sensitivityDistance, distance, beaconInfo.lastDistance));
             meshblu.message(message);
             emitter.emit(EVENTS.LOCATION_UPDATE, payload);
         }

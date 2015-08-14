@@ -2,6 +2,8 @@ package com.octoblu.beaconblu;
 
 import android.util.Log;
 
+import java.util.Date;
+
 /**
  * Created by octoblu on 8/3/15.
  */
@@ -11,8 +13,10 @@ public class BeaconInfo {
     public Boolean status;
     public String name;
     public Integer sensitivity = 50;
-    public Double lastDistance = 0.0;
+    private Double lastDistance = 0.0;
     public Double sensitivityDistance = 2.0;
+    private Date lastSeen = new Date();
+    private final Integer FIVE_MINUTES_MS = 5 * 60 * 1000;
     private final Double MAX_SENSITIVITY = 10.0;
 
     public BeaconInfo(SaneJSONObject jsonObject){
@@ -48,11 +52,21 @@ public class BeaconInfo {
         sensitivityDistance = ((sensitivity / 100.0) * MAX_SENSITIVITY);
     }
 
+    public Boolean hasChangedRecently(){
+        Date currentDate = new Date();
+
+        return lastSeen.getTime() > (currentDate.getTime() - FIVE_MINUTES_MS);
+    }
+
     public Boolean hasChangedDistance(Double distance){
         calculateSensitivity();
+        lastSeen = new Date();
+
         if(distance > (lastDistance + sensitivityDistance)){
+            Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), sensitivityDistance, distance, lastDistance));
             return true;
         }else if(distance < (lastDistance - sensitivityDistance)){
+            Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), sensitivityDistance, distance, lastDistance));
             return true;
         }
         return false;

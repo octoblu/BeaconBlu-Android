@@ -71,17 +71,16 @@ public class BeaconsActivity extends Activity {
     }
 
     public ArrayList<BeaconInfo> getBeaconInfo(){
-        SaneJSONObject beaconInfo = application.getAllBeaconInfoJSON();
-        Iterator<String> uuids = beaconInfo.keys();
-        ArrayList<BeaconInfo> beacons = new ArrayList();
-        while(uuids.hasNext()){
-            String uuid = uuids.next();
-            SaneJSONObject jsonObject = beaconInfo.getJSONOrNull(uuid);
-            jsonObject.putOrIgnore("uuid", uuid);
-            Log.d(TAG, String.format("Beacon added to array %s", uuid));
-            beacons.add(new BeaconInfo(jsonObject));
+        ArrayList<BeaconInfo> beacons = application.getCurrentBeaconInfo();
+        ArrayList<BeaconInfo> currentList = new ArrayList();
+        Iterator<BeaconInfo> iter = beacons.iterator();
+        while(iter.hasNext()){
+            BeaconInfo info = iter.next();
+            if(info.hasChangedRecently()){
+                currentList.add(info);
+            }
         }
-        return beacons;
+        return currentList;
     }
 
     private void updateList(){
