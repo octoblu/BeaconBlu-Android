@@ -1,25 +1,17 @@
 package com.octoblu.beaconblu;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 
-import org.altbeacon.beacon.Beacon;
-
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 
 public class BeaconsActivity extends Activity {
@@ -27,13 +19,33 @@ public class BeaconsActivity extends Activity {
     ListView listView;
     private BeaconApplication application;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beacons);
 
         application = (BeaconApplication) getApplication();
-        createList();
+
+        final SwipeRefreshLayout swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.beacon_swipe_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateOrCreateList();
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
+        listView = (ListView) findViewById(R.id.beacon_list);
+
+        updateOrCreateList();
+        new android.os.Handler().postDelayed(
+            new Runnable() {
+                public void run() {
+                    Log.i(TAG, "Refreshing list view...");
+                    updateOrCreateList();
+                }
+            }, 10000);
     }
 
     @Override
@@ -89,10 +101,10 @@ public class BeaconsActivity extends Activity {
         adapter.addAll(getBeaconInfo());
     }
 
-    private void createList(){
-        listView = (ListView) findViewById(R.id.beacon_list);
+    private void updateOrCreateList(){
         BeaconAdapter adapter = new BeaconAdapter(this, getBeaconInfo());
         listView.setAdapter(adapter);
+        listView.setEmptyView(findViewById(R.id.empty_list));
 
         application.on(BeaconApplication.BEACONS_CHANGED, new Emitter.Listener() {
             @Override
@@ -106,6 +118,7 @@ public class BeaconsActivity extends Activity {
 
             }
         });
+
     }
 
 }

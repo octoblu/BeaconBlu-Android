@@ -10,6 +10,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
@@ -30,11 +32,17 @@ public class BeaconAdapter extends ArrayAdapter<BeaconInfo> {
         // Lookup view for data population
         TextView uuid = (TextView) convertView.findViewById(R.id.uuid);
         TextView name = (TextView) convertView.findViewById(R.id.name);
+        TextView lastRange = (TextView) convertView.findViewById(R.id.last_range);
+        TextView lastUpdatedDate = (TextView) convertView.findViewById(R.id.last_updated_date);
         final CheckBox status = (CheckBox) convertView.findViewById(R.id.status_checkbox);
         // Populate the data into the template view using the data object
         uuid.setText(beacon.uuid);
         name.setText(beacon.name);
+        lastRange.setText(String.format("%dm", Math.round(beacon.lastDistance)));
+        DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy hh:mm");
+        lastUpdatedDate.setText(formatter.format(beacon.lastUpdated));
         status.setChecked(beacon.status);
+
         status.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg) {

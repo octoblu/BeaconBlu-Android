@@ -151,8 +151,8 @@ public class BeaconApplication extends Application {
     public Map<String, Boolean> getBeaconTypes(){
         SharedPreferences preferences = getSharedPreferences(BeaconApplication.PREFERENCES_FILE_NAME, 0);
         Map<String, Boolean> types = new HashMap();
-        types.put(ESTIMOTE, preferences.getBoolean(ESTIMOTE, false));
-        types.put(IBEACON, preferences.getBoolean(IBEACON, false));
+        types.put(ESTIMOTE, preferences.getBoolean(ESTIMOTE, true));
+        types.put(IBEACON, preferences.getBoolean(IBEACON, true));
         types.put(EASIBEACON, preferences.getBoolean(EASIBEACON, false));
         types.put(ALTBEACON, preferences.getBoolean(ALTBEACON, false));
         return types;

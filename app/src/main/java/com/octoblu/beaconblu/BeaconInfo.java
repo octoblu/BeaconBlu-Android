@@ -13,9 +13,10 @@ public class BeaconInfo {
     public Boolean status;
     public String name;
     public Integer sensitivity = 50;
-    private Double lastDistance = 0.0;
+    public Double lastDistance = 0.0;
     public Double sensitivityDistance = 2.0;
-    private Date lastSeen = new Date();
+    public Date lastSeen = new Date();
+    public Date lastUpdated = new Date();
     private final Integer FIVE_MINUTES_MS = 5 * 60 * 1000;
     private final Double MAX_SENSITIVITY = 10.0;
 
@@ -63,13 +64,18 @@ public class BeaconInfo {
         lastSeen = new Date();
 
         if(distance > (lastDistance + sensitivityDistance)){
-            Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), sensitivityDistance, distance, lastDistance));
+            significantChange(distance);
             return true;
         }else if(distance < (lastDistance - sensitivityDistance)){
-            Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), sensitivityDistance, distance, lastDistance));
+            significantChange(distance);
             return true;
         }
         return false;
+    }
+
+    private void significantChange(Double distance){
+        Log.d(TAG, String.format("Changed significant distance! %s %f %f %f", uuid.substring(0, 8), sensitivityDistance, distance, lastDistance));
+        lastUpdated = new Date();
     }
 
     public SaneJSONObject toJSON(){

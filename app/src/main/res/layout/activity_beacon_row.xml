@@ -48,13 +48,10 @@ android:gravity="left|center">
 
     </LinearLayout>
 
-
-
     <LinearLayout
         android:id="@+id/sensitivity_linear"
         android:layout_height="wrap_content"
         android:layout_width="fill_parent"
-        android:layout_alignParentBottom="true"
         android:layout_below="@+id/linear">
 
         <TextView
@@ -87,6 +84,66 @@ android:gravity="left|center">
             android:layout_margin="10dp"
             android:progress="20"/>
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/info_layout"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignParentBottom="true"
+        android:background="#D8D8D8"
+        android:layout_below="@+id/sensitivity_linear">
+
+        <TextView
+            android:id="@+id/last_updated_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="left|center"
+            android:paddingLeft="7dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:textSize="14sp"
+            android:textColor="#373737"
+            android:text="Last Updated"/>
+
+        <TextView
+            android:id="@+id/last_updated_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right|center"
+            android:paddingLeft="7dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:textSize="14sp"
+            android:textColor="#898989"
+            android:text="..."/>
+
+        <TextView
+            android:id="@+id/last_range_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:paddingLeft="7dp"
+            android:paddingBottom="7dp"
+            android:paddingTop="7dp"
+            android:textSize="14sp"
+            android:textColor="#373737"
+            android:text="Last Range"/>
+
+        <TextView
+            android:id="@+id/last_range"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right|center"
+            android:paddingLeft="7dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
+            android:textSize="14sp"
+            android:textColor="#898989"
+            android:text="..."/>
 
     </LinearLayout>
 
