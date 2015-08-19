@@ -39,13 +39,6 @@ public class BeaconsActivity extends Activity {
         listView = (ListView) findViewById(R.id.beacon_list);
 
         updateOrCreateList();
-        new android.os.Handler().postDelayed(
-            new Runnable() {
-                public void run() {
-                    Log.i(TAG, "Refreshing list view...");
-                    updateOrCreateList();
-                }
-            }, 10000);
     }
 
     @Override

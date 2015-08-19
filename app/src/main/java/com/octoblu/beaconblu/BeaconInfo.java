@@ -43,6 +43,14 @@ public class BeaconInfo {
         if(newSensitivity >= 0){
             sensitivity = newSensitivity;
         }
+        Date newLastSeen = jsonObject.getDateOrNull("lastSeen");
+        if(newLastSeen != null){
+            lastSeen = newLastSeen;
+        }
+        Date newLastUpdated = jsonObject.getDateOrNull("lastUpdated");
+        if(newLastUpdated != null){
+            lastUpdated = newLastUpdated;
+        }
     }
 
     public void setLastDistance(Double lastDistance){
@@ -54,6 +62,9 @@ public class BeaconInfo {
     }
 
     public Boolean hasChangedRecently(){
+        if(lastSeen == null){
+            return false;
+        }
         Date currentDate = new Date();
 
         return lastSeen.getTime() > (currentDate.getTime() - FIVE_MINUTES_MS);
@@ -84,6 +95,8 @@ public class BeaconInfo {
         jsonObject.putOrIgnore("name", name);
         jsonObject.putOrIgnore("uuid", uuid);
         jsonObject.putIntOrIgnore("sensitivity", sensitivity);
+        jsonObject.putDateOrIgnore("lastSeen", lastSeen);
+        jsonObject.putDateOrIgnore("lastUpdated", lastUpdated);
         return jsonObject;
     }
 }

@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.MissingResourceException;
 
 public class SaneJSONObject extends JSONObject {
@@ -39,6 +40,17 @@ public class SaneJSONObject extends JSONObject {
             return this.getBoolean(name);
         } catch (JSONException e) {
             return def;
+        }
+    }
+
+    public Date getDateOrNull(@Nullable String name) {
+        try {
+            Long time = this.getLong(name);
+            Date date = new Date();
+            date.setTime(time);
+            return date;
+        } catch (JSONException e) {
+            return null;
         }
     }
 
@@ -100,6 +112,15 @@ public class SaneJSONObject extends JSONObject {
 
     public void putArrayOrIgnore(@Nullable String name, @Nullable JSONArray value){
         try {
+            put(name, value);
+        } catch (JSONException e) {
+            return;
+        }
+    }
+
+    public void putDateOrIgnore(@Nullable String name, @Nullable Date date){
+        try {
+            Long value = date.getTime();
             put(name, value);
         } catch (JSONException e) {
             return;

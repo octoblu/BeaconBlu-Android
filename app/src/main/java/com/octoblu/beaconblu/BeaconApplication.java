@@ -57,6 +57,8 @@ public class BeaconApplication extends Application {
             @Override
             public void call(Object... args) {
                 Log.d(TAG, "Location update happened!");
+                BeaconInfo beaconInfo = (BeaconInfo) args[1];
+                setBeaconInfo(beaconInfo.uuid, beaconInfo.toJSON());
             }
         });
 
